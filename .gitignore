@@ -15,7 +15,7 @@ build/
 venv/
 
 # Tests locales 
-test_search.py
+test_*.py
 
 # IDEs
 .vscode/
