@@ -1,0 +1,35 @@
+name: Job Digest Diario
+
+on:
+  schedule:
+    - cron: "0 6 * * 1-5"
+  workflow_dispatch:
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Ejecutar Job Digest
+        env:
+          ANTHROPIC_API_KEY:  ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_USER:         ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RAPIDAPI_KEY:       ${{ secrets.RAPIDAPI_KEY }}
+          MIN_SALARY:         ${{ secrets.MIN_SALARY }}
+          LOCATIONS:          ${{ secrets.LOCATIONS }}
+          ROLES:              ${{ secrets.ROLES }}
+          TECH_STACK:         ${{ secrets.TECH_STACK }}
+        run: python digest.py
