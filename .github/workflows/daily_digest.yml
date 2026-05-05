@@ -2,11 +2,18 @@ name: Job Digest Diario
 
 on:
   schedule:
+<<<<<<< HEAD
     - cron: "0 6 * * 1-5"
   workflow_dispatch:
   
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+=======
+    # Lunes a viernes a las 8:00h hora peninsular (UTC+2 en verano = 06:00 UTC)
+    - cron: "0 6 * * 1-5"
+  workflow_dispatch:
+    # Permite lanzar el workflow manualmente desde la interfaz de GitHub
+>>>>>>> 4cc87a2 (adding Github Actions cron workflow)
 
 jobs:
   digest:
@@ -35,4 +42,8 @@ jobs:
           LOCATIONS:          ${{ secrets.LOCATIONS }}
           ROLES:              ${{ secrets.ROLES }}
           TECH_STACK:         ${{ secrets.TECH_STACK }}
+<<<<<<< HEAD
         run: python digest.py
+=======
+        run: python digest.py
+>>>>>>> 4cc87a2 (adding Github Actions cron workflow)
