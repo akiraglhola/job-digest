@@ -45,8 +45,7 @@ def search_jobs(query: str, num_pages: int = 1) -> list[dict]:
         "query":            query,
         "page":             "1",
         "num_pages":        str(num_pages),
-        "date_posted":      "week",      # Solo ofertas de los últimos 7 días
-        "employment_types": "FULLTIME",
+        "date_posted":      "month",
     }
     try:
         resp = requests.get(
