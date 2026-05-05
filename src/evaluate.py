@@ -31,7 +31,7 @@ def _build_profile() -> str:
 """
 
 
-# - Prompt -
+# -- Prompt --
 
 def _build_prompt(jobs: list[dict], profile: str) -> str:
     """
