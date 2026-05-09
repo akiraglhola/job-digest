@@ -111,6 +111,11 @@ def evaluate_jobs(jobs: list[dict]) -> dict:
         },
         timeout=60,
     )
+
+    # Muestra el error completo antes de lanzar la excepción
+    if not response.ok:
+        print(f"[ERROR] Status: {response.status_code}")
+        print(f"[ERROR] Respuesta: {response.text}")
     response.raise_for_status()
 
     raw = response.json()["content"][0]["text"].strip()
