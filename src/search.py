@@ -106,7 +106,7 @@ def _normalize(job: dict) -> dict:
         "remoto":      False, # Adzuna no tiene campo remoto explícito
         "salario":     _format_salary(job),
         "url":         job.get("redirect_url", "N/A"),
-        "descripcion": (job.get("description") or "")[:800],
+        "descripcion": (job.get("description") or "")[:500],
     }
  
  

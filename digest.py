@@ -1,7 +1,7 @@
 """
 digest.py
 Punto de entrada del proyecto. Orquesta el flujo completo:
-  1. Busca ofertas en JSearch (RapidAPI)
+  1. Busca ofertas en Adzuna
   2. Evalua el encaje con la API de Claude
   3. Envia el resultado por email via Gmail SMTP
 """
@@ -15,7 +15,7 @@ def main() -> None:
     print("[INFO] Iniciando Job Digest...")
 
     # buscar ofertas
-    jobs = collect_jobs()
+    jobs = collect_jobs(max_per_term=3)
     if not jobs:
         print("[WARN] No se encontraron ofertas. Abortando.")
         return
