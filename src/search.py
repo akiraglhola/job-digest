@@ -9,7 +9,7 @@ import requests
  
 # -- Config --
  
-JSEARCH_URL = "https://jsearch.p.rapidapi.com/search"
+ADZUNA_BASE_URL = "https://api.adzuna.com/v1/api/jobs/es/search/1"
  
 SEARCH_TERMS = [
     "Data Engineer Spain",
@@ -20,42 +20,40 @@ SEARCH_TERMS = [
 ]
  
  
-def _get_headers() -> dict:
-    return {
-        "X-RapidAPI-Key":  os.environ["RAPIDAPI_KEY"],
-        "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
-    }
+def _get_credentials() -> tuple[str, str]:
+    """Devuelve las credenciales de Adzuna desde las variables de entorno."""
+    return os.environ["ADZUNA_APP_ID"], os.environ["ADZUNA_APP_KEY"]
+ 
  
  
 # -- Búsqueda --
  
-def search_jobs(query: str, num_pages: int = 1) -> list[dict]:
+def search_jobs(query: str, result_per_pages: int = 10) -> list[dict]:
     """
-    Llama a JSearch con un término de búsqueda y devuelve
+    Llama a la API de Adzuna con un término de búsqueda y devuelve
     una lista de ofertas normalizadas.
  
     Args:
         query:     Término de búsqueda (ej. "Data Engineer Spain").
-        num_pages: Número de páginas a recuperar (10 resultados por página).
+        results_per_pages: Número de resultados a recuperar.
  
     Returns:
         Lista de dicts con los campos relevantes de cada oferta.
     """
+    app_id, app_key = _get_credentials()
+
     params = {
+        "app_id":           app_id,
+        "app_key":          app_key,
         "query":            query,
-        "page":             "1",
-        "num_pages":        str(num_pages),
-        "date_posted":      "month",
+        "results_per_page": result_per_pages,
+        "content-type":     "application/json",
+        "sort_by":          "date", 
     }
     try:
-        resp = requests.get(
-            JSEARCH_URL,
-            headers=_get_headers(),
-            params=params,
-            timeout=15,
-        )
+        resp = requests.get(ADZUNA_BASE_URL, params=params, timeout=15)
         resp.raise_for_status()
-        jobs = resp.json().get("data", [])
+        jobs = resp.json().get("results", [])
         return [_normalize(job) for job in jobs]
  
     except requests.exceptions.Timeout:
@@ -98,14 +96,14 @@ def collect_jobs(max_per_term: int = 5) -> list[dict]:
  
 def _normalize(job: dict) -> dict:
     """
-    Extrae y estandariza los campos relevantes de una oferta raw de JSearch.
+    Extrae y estandariza los campos relevantes de una oferta raw de Adzuna.
     Limita la descripción a 800 caracteres para no inflar el contexto de Claude.
     """
     return {
         "titulo":      job.get("job_title", "N/A"),
         "empresa":     job.get("employer_name", "N/A"),
         "ubicacion":   _format_location(job),
-        "remoto":      job.get("job_is_remote", False),
+        "remoto":      False, # Adzuna no tiene campo remoto explícito
         "salario":     _format_salary(job),
         "url":         job.get("job_apply_link") or job.get("job_google_link", "N/A"),
         "descripcion": (job.get("job_description") or "")[:800],
