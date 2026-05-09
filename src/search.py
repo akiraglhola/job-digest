@@ -1,6 +1,6 @@
 """
 search.py
-Responsabilidad: buscar ofertas de trabajo en JSearch (RapidAPI)
+Responsabilidad: buscar ofertas de trabajo en Adzuna API
 y devolver una lista normalizada lista para evaluar
 """
  
@@ -12,11 +12,11 @@ import requests
 ADZUNA_BASE_URL = "https://api.adzuna.com/v1/api/jobs/es/search/1"
  
 SEARCH_TERMS = [
-    "Data Engineer Spain",
-    "Data Scientist Spain",
-    "Analytics Engineer Spain",
-    "ETL Python Spain",
-    "Backend Developer Python Spain",
+    "Data Engineer",
+    "Data Scientist",
+    "Analytics Engineer",
+    "ETL Python",
+    "Backend Developer Python",
 ]
  
  
@@ -28,14 +28,14 @@ def _get_credentials() -> tuple[str, str]:
  
 # -- Búsqueda --
  
-def search_jobs(query: str, result_per_pages: int = 10) -> list[dict]:
+def search_jobs(query: str, results_per_page: int = 10) -> list[dict]:
     """
     Llama a la API de Adzuna con un término de búsqueda y devuelve
     una lista de ofertas normalizadas.
  
     Args:
         query:     Término de búsqueda (ej. "Data Engineer Spain").
-        results_per_pages: Número de resultados a recuperar.
+        results_per_page: Número de resultados a recuperar.
  
     Returns:
         Lista de dicts con los campos relevantes de cada oferta.
@@ -45,8 +45,8 @@ def search_jobs(query: str, result_per_pages: int = 10) -> list[dict]:
     params = {
         "app_id":           app_id,
         "app_key":          app_key,
-        "query":            query,
-        "results_per_page": result_per_pages,
+        "what":            query,
+        "results_per_page": results_per_page,
         "content-type":     "application/json",
         "sort_by":          "date", 
     }
@@ -100,27 +100,21 @@ def _normalize(job: dict) -> dict:
     Limita la descripción a 800 caracteres para no inflar el contexto de Claude.
     """
     return {
-        "titulo":      job.get("job_title", "N/A"),
-        "empresa":     job.get("employer_name", "N/A"),
-        "ubicacion":   _format_location(job),
+        "titulo":      job.get("title", "N/A"),
+        "empresa":     job.get("company", {}).get("display_name", "N/A"),
+        "ubicacion":   job.get("location", {}).get("display_name", "N/A"),
         "remoto":      False, # Adzuna no tiene campo remoto explícito
         "salario":     _format_salary(job),
-        "url":         job.get("job_apply_link") or job.get("job_google_link", "N/A"),
-        "descripcion": (job.get("job_description") or "")[:800],
+        "url":         job.get("redirect_url", "N/A"),
+        "descripcion": (job.get("description") or "")[:800],
     }
  
  
-def _format_location(job: dict) -> str:
-    city    = job.get("job_city", "")
-    country = job.get("job_country", "")
-    return f"{city}, {country}".strip(", ") or "N/A"
- 
- 
 def _format_salary(job: dict) -> str:
-    min_s = job.get("job_min_salary")
-    max_s = job.get("job_max_salary")
+    min_s = job.get("salary_min")
+    max_s = job.get("salary_max")
     if min_s and max_s:
-        return f"{int(min_s):,}€ – {int(max_s):,}€"
+        return f"{int(min_s):,}€ - {int(max_s):,}€"
     if min_s:
         return f"Desde {int(min_s):,}€"
     return "No especificado"
